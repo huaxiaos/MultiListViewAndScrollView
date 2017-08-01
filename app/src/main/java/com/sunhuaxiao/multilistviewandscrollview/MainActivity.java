@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 switch (scrollState) {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
-                        // lv2滚动到顶部，屏蔽sv的滚动，开启lv2的滚动
+                        // lv2滚动到顶部，屏蔽lv2的滚动，开启sv的滚动
                         if (view.getFirstVisiblePosition() == 0) {
                             mLv2.allowParentScroll();
                             mSv.forbidChildScroll();
