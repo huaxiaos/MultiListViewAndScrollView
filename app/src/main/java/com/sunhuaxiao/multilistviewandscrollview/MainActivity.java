@@ -20,27 +20,30 @@ public class MainActivity extends AppCompatActivity {
 
     private int mLastY;
     private boolean mMix;
+    private MultiListView mLv1;
+    private MultiListView mLv2;
+    private MultiScrollView mSv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final MultiScrollView sv = (MultiScrollView) findViewById(R.id.sv);
-        final MultiListView lv1 = (MultiListView) findViewById(R.id.list_1);
-        final MultiListView lv2 = (MultiListView) findViewById(R.id.list_2);
+        mSv = (MultiScrollView) findViewById(R.id.sv);
+        mLv1 = (MultiListView) findViewById(R.id.list_1);
+        mLv2 = (MultiListView) findViewById(R.id.list_2);
         final ConstraintLayout root = (ConstraintLayout) findViewById(R.id.root);
 
-        lv1.setScrollView(sv);
-        lv2.setScrollView(sv);
+        mLv1.setScrollView(mSv);
+        mLv2.setScrollView(mSv);
 
         final MyAdapter adapter1 = new MyAdapter(this, 1, 100);
-        lv1.setAdapter(adapter1);
+        mLv1.setAdapter(adapter1);
 
         MyAdapter adapter2 = new MyAdapter(this, 2, 100);
-        lv2.setAdapter(adapter2);
+        mLv2.setAdapter(adapter2);
 
-        lv1.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mLv1.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 switch (scrollState) {
@@ -48,12 +51,7 @@ public class MainActivity extends AppCompatActivity {
                         // lv1滚动到底部，屏蔽lv1的滚动，开启sv的滚动，状态设置为混合状态
                         // 这段代码不能省略，否则在lv1滚动到底部后，无法开启sv的滚动，进而无法加载lv2
                         if (view.getLastVisiblePosition() == (view.getCount() - 1)) {
-                            lv1.allowParentScroll();
-                            sv.forbidChildScroll();
-
-                            mMix = true;
-                            lv1.setMix(true);
-                            lv2.setMix(true);
+                            setMixStatus(true);
                         }
                         break;
                 }
@@ -65,22 +63,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mLv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MainActivity.this, "lv1 " + position, Toast.LENGTH_SHORT).show();
             }
         });
 
-        lv2.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mLv2.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 switch (scrollState) {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
                         // lv2滚动到顶部，屏蔽sv的滚动，开启lv2的滚动
                         if (view.getFirstVisiblePosition() == 0) {
-                            lv2.allowParentScroll();
-                            sv.forbidChildScroll();
+                            mLv2.allowParentScroll();
+                            mSv.forbidChildScroll();
                         }
                         break;
                 }
@@ -90,52 +88,52 @@ public class MainActivity extends AppCompatActivity {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (visibleItemCount == totalItemCount) {
                     // 说明listview2的高度是小于父控件高度的
-                    lv2.setMaxHeight(setListViewHeightBasedOnChildren(lv2, 0));
-                    lv2.setMax(true);
+                    mLv2.setMaxHeight(setListViewHeightBasedOnChildren(mLv2, 0));
+                    mLv2.setMax(true);
                 }
             }
         });
 
-        lv2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mLv2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MainActivity.this, "lv2 " + position, Toast.LENGTH_SHORT).show();
             }
         });
 
-        sv.setScrollViewListener(new MultiScrollView.ScrollViewListener() {
+        mSv.setScrollViewListener(new MultiScrollView.ScrollViewListener() {
             @Override
             public void onScrollChanged(ScrollView scrollView, int x, int y, int oldx, int oldy) {
                 int[] svLocation = new int[2];
-                sv.getLocationOnScreen(svLocation);
+                mSv.getLocationOnScreen(svLocation);
 
-                int[] listview1location = new int[2];
-                lv1.getLocationOnScreen(listview1location);
+                int[] lv1location = new int[2];
+                mLv1.getLocationOnScreen(lv1location);
 
                 // 如果listview1正好填满整个屏幕，屏蔽scrollview的滚动
-                if (listview1location[1] == svLocation[1]) {
-                    lv1.forbidParentScroll();
-                    sv.allowChildScroll();
-                    lv1.setMix(false);
+                if (lv1location[1] == svLocation[1]) {
+                    mLv1.forbidParentScroll();
+                    mSv.allowChildScroll();
+                    mLv1.setMix(false);
                     return;
                 }
 
                 int[] lv2Location = new int[2];
-                lv2.getLocationOnScreen(lv2Location);
+                mLv2.getLocationOnScreen(lv2Location);
 
                 if (lv2Location[1] == svLocation[1]) {
-                    lv2.forbidParentScroll();
-                    sv.allowChildScroll();
-                    lv2.setMix(false);
+                    mLv2.forbidParentScroll();
+                    mSv.allowChildScroll();
+                    mLv2.setMix(false);
                     return;
                 }
 
                 // lv1与lv2的混合状态下，屏蔽listview的滚动
-                sv.forbidChildScroll();
+                mSv.forbidChildScroll();
             }
         });
 
-        sv.setOnTouchListener(new View.OnTouchListener() {
+        mSv.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
@@ -149,22 +147,22 @@ public class MainActivity extends AppCompatActivity {
                         int dy = (int) event.getRawY() - mLastY;
 
                         if (mMix) {
-                            if (lv2.isMax()) {
-                                if (lv2.getHeight() < lv2.getMaxHeight()) {
+                            if (mLv2.isMax()) {
+                                if (mLv2.getHeight() < mLv2.getMaxHeight()) {
                                     // 用于防止出现最后一项显示不全的状况
-                                    ViewGroup.LayoutParams layoutParams = lv2.getLayoutParams();
-                                    layoutParams.height = lv2.getMaxHeight();
-                                    lv2.setLayoutParams(layoutParams);
+                                    ViewGroup.LayoutParams layoutParams = mLv2.getLayoutParams();
+                                    layoutParams.height = mLv2.getMaxHeight();
+                                    mLv2.setLayoutParams(layoutParams);
                                 }
                             } else if (dy < 0) {
                                 // 只有在lv2高度扩大时才执行
-                                ViewGroup.LayoutParams layoutParams = lv2.getLayoutParams();
-                                int dex = lv2.getHeight() - dy;
+                                ViewGroup.LayoutParams layoutParams = mLv2.getLayoutParams();
+                                int dex = mLv2.getHeight() - dy;
                                 if (dex > root.getHeight()) {
                                     dex = root.getHeight();
                                 }
                                 layoutParams.height = dex;
-                                lv2.setLayoutParams(layoutParams);
+                                mLv2.setLayoutParams(layoutParams);
                             }
                         }
 
@@ -172,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case MotionEvent.ACTION_UP:
-                        sv.allowChildScroll();
+                        mSv.allowChildScroll();
                         break;
                 }
 
@@ -183,19 +181,33 @@ public class MainActivity extends AppCompatActivity {
         root.post(new Runnable() {
             @Override
             public void run() {
-                int lv1Height = setListViewHeightBasedOnChildren(lv1, root.getHeight());
+                int lv1Height = setListViewHeightBasedOnChildren(mLv1, root.getHeight());
 
                 if (lv1Height < root.getHeight()) {
                     int residue = root.getHeight() - lv1Height;
-                    setListViewHeightBasedOnChildren(lv2, residue);
-
-                    lv1.allowParentScroll();
-                    sv.forbidChildScroll();
-
-                    mMix = true;
+                    setListViewHeightBasedOnChildren(mLv2, residue);
+                    setMixStatus(true);
                 }
             }
         });
+    }
+
+    private void setMixStatus(boolean mix) {
+        if (mix) {
+            mLv1.allowParentScroll();
+            mLv2.allowParentScroll();
+            mLv1.setMix(true);
+            mLv2.setMix(true);
+            mSv.forbidChildScroll();
+        } else {
+            mLv1.forbidParentScroll();
+            mLv2.forbidParentScroll();
+            mLv1.setMix(false);
+            mLv2.setMix(false);
+            mSv.allowChildScroll();
+        }
+
+        mMix = mix;
     }
 
     private static class MyAdapter extends BaseAdapter {
