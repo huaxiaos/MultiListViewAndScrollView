@@ -8,6 +8,10 @@
 
 值得一提的是，本文只是单纯的探讨Scrollview中嵌套两个listview的解决方案。有的朋友会说，完全可以使用RecycleView，或者自定义LinearLayout来实现这个需求，但就是另外一个问题了，和本文无关。
 
+# 效果展示
+
+![image](http://7xuvhf.com1.z0.glb.clouddn.com/multilistviewandscrollview.gif)
+
 # 面临的问题
 
 Scrollview中嵌套两个listview，会面临以下几个问题
