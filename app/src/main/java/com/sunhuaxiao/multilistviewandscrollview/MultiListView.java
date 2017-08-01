@@ -15,10 +15,11 @@ import android.widget.ScrollView;
 
 public class MultiListView extends ListView {
 
-    private ScrollView mScrollView;
+    private MultiScrollView mScrollView;
     private boolean mForbidParentScroll = true;
     private boolean mMax;
     private int mMaxHeight;
+    private boolean mMix;
 
     public MultiListView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,7 +41,7 @@ public class MultiListView extends ListView {
         mForbidParentScroll = false;
     }
 
-    public void setScrollView(ScrollView scrollView) {
+    public void setScrollView(MultiScrollView scrollView) {
         this.mScrollView = scrollView;
     }
 
@@ -68,6 +69,13 @@ public class MultiListView extends ListView {
                     mScrollView.requestDisallowInterceptTouchEvent(false);
                     break;
             }
+        } else {
+            mScrollView.requestDisallowInterceptTouchEvent(false);
+            if (mMix) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    return true;
+                }
+            }
         }
         return super.dispatchTouchEvent(event);
     }
@@ -86,5 +94,9 @@ public class MultiListView extends ListView {
 
     public void setMaxHeight(int maxHeight) {
         this.mMaxHeight = maxHeight;
+    }
+
+    public void setMix(boolean mix) {
+        this.mMix = mix;
     }
 }

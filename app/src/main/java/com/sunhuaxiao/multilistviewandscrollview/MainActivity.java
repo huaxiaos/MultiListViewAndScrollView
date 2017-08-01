@@ -8,11 +8,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -48,7 +50,10 @@ public class MainActivity extends AppCompatActivity {
                         if (view.getLastVisiblePosition() == (view.getCount() - 1)) {
                             lv1.allowParentScroll();
                             sv.forbidChildScroll();
+
                             mMix = true;
+                            lv1.setMix(true);
+                            lv2.setMix(true);
                         }
                         break;
                 }
@@ -60,16 +65,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "lv1 " + position, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         lv2.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 switch (scrollState) {
                     case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
-                        // lv2滚动到顶部，屏蔽sv的滚动，开启lv2的滚动，状态位重置
+                        // lv2滚动到顶部，屏蔽sv的滚动，开启lv2的滚动
                         if (view.getFirstVisiblePosition() == 0) {
-                            lv2.forbidParentScroll();
-                            sv.allowChildScroll();
-                            mMix = false;
+                            lv2.allowParentScroll();
+                            sv.forbidChildScroll();
                         }
                         break;
                 }
@@ -82,6 +93,13 @@ public class MainActivity extends AppCompatActivity {
                     lv2.setMaxHeight(setListViewHeightBasedOnChildren(lv2, 0));
                     lv2.setMax(true);
                 }
+            }
+        });
+
+        lv2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "lv2 " + position, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -98,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 if (listview1location[1] == svLocation[1]) {
                     lv1.forbidParentScroll();
                     sv.allowChildScroll();
+                    lv1.setMix(false);
                     return;
                 }
 
@@ -107,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 if (lv2Location[1] == svLocation[1]) {
                     lv2.forbidParentScroll();
                     sv.allowChildScroll();
+                    lv2.setMix(false);
                     return;
                 }
 
@@ -136,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
                                     layoutParams.height = lv2.getMaxHeight();
                                     lv2.setLayoutParams(layoutParams);
                                 }
-                            } else {
+                            } else if (dy < 0) {
+                                // 只有在lv2高度扩大时才执行
                                 ViewGroup.LayoutParams layoutParams = lv2.getLayoutParams();
                                 int dex = lv2.getHeight() - dy;
                                 if (dex > root.getHeight()) {
